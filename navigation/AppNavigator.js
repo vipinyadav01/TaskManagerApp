@@ -1,8 +1,6 @@
-import { DarkTheme, NavigationContainer } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { auth } from "../firebaseConfig";
+import { useAuth } from "../constants/AuthContext";
 
 import AddTask from "../screens/AddTask";
 import Dashboard from "../screens/Dashboard";
@@ -15,21 +13,12 @@ import SplashScreen from "../screens/SplashScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (usr) => {
-      setUser(usr);
-      setLoading(false);
-    });
-    return unsub;
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) return <SplashScreen />;
 
   return (
-    <NavigationContainer theme={DarkTheme /* can toggle */}>
+    <NavigationContainer theme={user?.theme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>
