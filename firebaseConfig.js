@@ -1,6 +1,7 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { initializeApp } from "firebase/app";
+import { getAuth, getReactNativePersistence, initializeAuth } from "firebase/auth";
+import { Platform } from "react-native";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBq1vWYGTTMZlZuGPUd2EZqx0jbFSkT6vs",
@@ -14,7 +15,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Use React Native persistence so auth state survives reloads
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+let authInstance;
+try {
+  if (Platform.OS === "web") {
+    authInstance = getAuth(app);
+  } else {
+    authInstance = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  }
+} catch (e) {
+  authInstance = getAuth(app);
+}
+
+export const auth = authInstance;
